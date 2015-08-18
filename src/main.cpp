@@ -19,6 +19,7 @@
 
 #include <igl/cut_mesh.h>
 #include <igl/cotmatrix.h>
+#include <igl/grad.h>
 // Input mesh
 Eigen::MatrixXd V;
 Eigen::MatrixXi F;
@@ -387,7 +388,46 @@ igl::comiso::miq(V,
     }
     outfile.close();
 */
-  // Plot the mesh
+  //// Check RHS output
+  Eigen::MatrixXd Vcut;
+  Eigen::MatrixXi Fcut;
+  igl::cut_mesh(V, F, Seams, Vcut, Fcut);
+  Eigen::SparseMatrix<double> G(Fcut.rows() * 3, Vcut.rows());
+  igl::grad(Vcut, Fcut, G);
+  // triangle weights
+  Eigen::VectorXd dblA(Fcut.rows());
+  igl::doublearea(Vcut, Fcut, dblA);
+  Eigen::VectorXd w (Fcut.rows()*3);
+  for(int i = 0; i < dblA.size(); i++){
+	  w[i] = dblA[i];
+	  w[Fcut.rows() + i] = dblA[i];
+	  w[2 * Fcut.rows() + i] = dblA[i];
+  }
+
+  //vector field scale correction
+  double vfs = gradient_size/(V.colwise().maxCoeff()-V.colwise().minCoeff()).norm();
+
+  //stiffness value
+  double h = stiffness;
+
+  //reshape nrosy vectors
+  Eigen::MatrixXd u = Eigen::Map<Eigen::MatrixXd>(X1_combed.data(),Fcut.rows()*3,1); // this mimics a reshape at the cost of a copy.
+  Eigen::MatrixXd v = Eigen::Map<Eigen::MatrixXd>(X2_combed.data(),Fcut.rows()*3,1); // this mimics a reshape at the cost of a copy.
+
+  //multiply with weights
+  u = (u.array() * w.array()).matrix();
+  v = (v.array() * w.array()).matrix();
+  Eigen::VectorXd RhsU = G.transpose() * u * 0.5 * vfs * h;
+  Eigen::VectorXd RhsV = -G.transpose() * v * 0.5 * vfs * h;
+
+  std::ofstream outfile;
+  outfile.open("laplaceRHSIGL.txt");
+  for(int i = 0; i < RhsU.size(); i++){
+    outfile << RhsU[i] << std::endl << RhsV[i] << std::endl;
+  }
+  outfile.close();
+
+  //// Plot the mesh
   igl::viewer::Viewer viewer;
   // Plot the original mesh with a texture parametrization
   key_down(viewer,'7',0);
