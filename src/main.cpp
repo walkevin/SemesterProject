@@ -371,27 +371,27 @@ igl::comiso::miq(V,
          5,
          false);
 
-/* DONT REMOVE FOR DEMO PURPOSES
+  //// Check LHS and RHS outputs
   Eigen::MatrixXd Vcut;
   Eigen::MatrixXi Fcut;
-
   igl::cut_mesh(V, F, Seams, Vcut, Fcut);
+  std::ofstream outfile;
+
+  //// Check LHS output
   Eigen::SparseMatrix<double> C(Vcut.rows(), Vcut.rows());
   igl::cotmatrix(Vcut, Fcut, C);
-  std::ofstream outfile;
-    outfile.open("laplaceIGL.txt");
-    for(int i = 0; i < C.rows(); i++){
-      for(int j = 0; j < C.cols(); j++){
-        if(C.coeffRef(i,j) != 0)
+  C = C * Eigen::VectorXd::Constant(Vcut.rows(), stiffness).asDiagonal();
+
+  outfile.open("laplaceIGL.txt");
+  for(int i = 0; i < C.rows(); i++){
+    for(int j = 0; j < C.cols(); j++){
+      if(C.coeffRef(i,j) != 0)
         outfile << i << "\t" << j << "\t" << -C.coeffRef(i,j) << std::endl;
-      }
     }
-    outfile.close();
-*/
+  }
+  outfile.close();
+
   //// Check RHS output
-  Eigen::MatrixXd Vcut;
-  Eigen::MatrixXi Fcut;
-  igl::cut_mesh(V, F, Seams, Vcut, Fcut);
   Eigen::SparseMatrix<double> G(Fcut.rows() * 3, Vcut.rows());
   igl::grad(Vcut, Fcut, G);
   // triangle weights
@@ -420,7 +420,6 @@ igl::comiso::miq(V,
   Eigen::VectorXd RhsU = G.transpose() * u * 0.5 * vfs * h;
   Eigen::VectorXd RhsV = -G.transpose() * v * 0.5 * vfs * h;
 
-  std::ofstream outfile;
   outfile.open("laplaceRHSIGL.txt");
   for(int i = 0; i < RhsU.size(); i++){
     outfile << RhsU[i] << std::endl << RhsV[i] << std::endl;
