@@ -68,7 +68,7 @@ struct MIQState : public igl::Serializable
 
   // You have to define this function to
   // register the fields you want to serialize
-  void InitSerialization()
+  virtual void InitSerialization()
   {
     this->Add(UV  , "UV");
     this->Add(FUV , "FUV");
@@ -370,23 +370,6 @@ igl::comiso::miq(V,
          5,
          false);
 
-/* DONT REMOVE FOR DEMO PURPOSES
-  Eigen::MatrixXd Vcut;
-  Eigen::MatrixXi Fcut;
-
-  igl::cut_mesh(V, F, Seams, Vcut, Fcut);
-  Eigen::SparseMatrix<double> C(Vcut.rows(), Vcut.rows());
-  igl::cotmatrix(Vcut, Fcut, C);
-  std::ofstream outfile;
-    outfile.open("laplaceIGL.txt");
-    for(int i = 0; i < C.rows(); i++){
-      for(int j = 0; j < C.cols(); j++){
-        if(C.coeffRef(i,j) != 0)
-        outfile << i << "\t" << j << "\t" << -C.coeffRef(i,j) << std::endl;
-      }
-    }
-    outfile.close();
-*/
   // Plot the mesh
   igl::viewer::Viewer viewer;
   // Plot the original mesh with a texture parametrization
