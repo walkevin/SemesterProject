@@ -81,10 +81,10 @@ struct MIQState : public igl::Serializable
     out << "Checking UV..\n";
     int nErrorsUV = 0;
     for(int i = 0; i < UV.rows(); i++){
-      if(UV.row(i) != other.UV.row(i)){
+      if((UV.row(i) - other.UV.row(i)).norm() > 1e-06){
         if(nErrorsUV == 0)
           out << "Index\tthisUV\totherUV\n";
-        out << i << UV(i,0) << "\t" << UV(i,1) << "\t" << other.UV(i,0) << "\t" << other.UV(i,1) << std::endl;
+        out << i << "\t" << UV(i,0) << "\t" << UV(i,1) << "\t" << other.UV(i,0) << "\t" << other.UV(i,1) << std::endl;
         nErrorsUV++;
       }
     }
@@ -95,7 +95,7 @@ struct MIQState : public igl::Serializable
       if(FUV.row(i) != other.FUV.row(i)){
         if(nErrorsFUV == 0)
           out << "Index\tthisFUV\totherFUV\n";
-        out << i << FUV(i,0) << "\t" << FUV(i,1) << "\t" << other.FUV(i,0) << "\t" << other.FUV(i,1) << std::endl;
+        out << i << "\t" << FUV(i,0) << "\t" << FUV(i,1) << "\t" << other.FUV(i,0) << "\t" << other.FUV(i,1) << std::endl;
         nErrorsFUV++;
       }
     }
