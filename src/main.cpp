@@ -79,15 +79,21 @@ struct MIQState : public igl::Serializable
   void printDiff(const MIQState &other, std::ostream& out = std::cout){
     std::cout << "Start Diff..\n";
     out << "Checking UV..\n";
+    std::vector<double> errs;
     int nErrorsUV = 0;
     for(int i = 0; i < UV.rows(); i++){
-      if((UV.row(i) - other.UV.row(i)).norm() > 1e-06){
+      double diff = (UV.row(i) - other.UV.row(i)).norm();
+      errs.push_back(diff);
+      if(diff > 1e-06){
         if(nErrorsUV == 0)
           out << "Index\tthisUV\totherUV\n";
         out << i << "\t" << UV(i,0) << "\t" << UV(i,1) << "\t" << other.UV(i,0) << "\t" << other.UV(i,1) << std::endl;
         nErrorsUV++;
       }
     }
+    std::cout << "Average error: " << std::accumulate(errs.begin(), errs.end(), 0.) / static_cast<double>(errs.size());
+    std::cout << " +/- " << std::accumulate(errs.begin(), errs.end(), 0., [](double init, double value){return init + value * value;} ) / static_cast<double>(errs.size() -1) << std::endl;
+    std::cout << "Max absolute error: " << *std::max_element(errs.begin(), errs.end()) << std::endl;
 
     out << "Checking FUV..\n";
     int nErrorsFUV = 0;
