@@ -360,6 +360,7 @@ int main(int argc, char *argv[])
            true);
 
 // Global parametrization (with seams, only for demonstration)
+/*
 igl::comiso::miq(V,
          F,
          X1_combed,
@@ -375,7 +376,7 @@ igl::comiso::miq(V,
          iter,
          5,
          false);
-
+*/
   // Plot the mesh
   igl::viewer::Viewer viewer;
   // Plot the original mesh with a texture parametrization
