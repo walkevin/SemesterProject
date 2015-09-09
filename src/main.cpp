@@ -62,8 +62,6 @@ Eigen::MatrixXi FUV_seams;
 Eigen::MatrixXd UV;
 Eigen::MatrixXi FUV;
 
-//DEBUG
-std::vector<igl::comiso::DebugFaceEdgeInfo> debugFaceEdgeInfo;
 // Serialization state
 struct MIQState : public igl::Serializable
 {
@@ -211,26 +209,6 @@ bool key_down(igl::viewer::Viewer& viewer, unsigned char key, int modifier)
       else if (singularityIndex(i) > 2)
         viewer.data.add_points(V.row(i),Eigen::RowVector3d(0,1,0));
     }
-
-
-    //DEBUG
-    int maxIntVar = 0;
-    for(auto dfe : debugFaceEdgeInfo){
-      if(maxIntVar < dfe.integerVar){
-        maxIntVar = dfe.integerVar;
-      }
-    }
-    Eigen::VectorXi idx  = Eigen::VectorXi::LinSpaced(maxIntVar+1, 0, maxIntVar);
-    Eigen::MatrixXd C;
-    igl::jet(idx, true, C);
-    Eigen::MatrixXd face_colors = Eigen::MatrixXd::Ones(F.rows(), 3);
-    for(auto dfe : debugFaceEdgeInfo){
-      int f = dfe.f;
-      int integerVar = dfe.integerVar;
-      face_colors.row(f) = C.row((integerVar * (maxIntVar-1)) % maxIntVar);
-      viewer.data.add_label(1./3. * (V.row(F(f,0)) + V.row(F(f,1)) + V.row(F(f,2))), std::to_string(integerVar));
-    }
-    viewer.data.set_colors(face_colors);
   }
 
   if (key == '5')
@@ -376,8 +354,6 @@ int main(int argc, char *argv[])
            Seams,
            UV,
            FUV,
-           //DEBUG
-           debugFaceEdgeInfo,
            gradient_size,
            stiffness,
            direct_round,
@@ -396,8 +372,6 @@ igl::comiso::miq(V,
          Seams,
          UV_seams,
          FUV_seams,
-         //DEBUG
-         debugFaceEdgeInfo,
          gradient_size,
          stiffness,
          direct_round,
